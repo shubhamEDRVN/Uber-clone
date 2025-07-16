@@ -1,0 +1,40 @@
+const userModel = require('../models/user.model');
+const userService = require('../services/user.service');
+const { validationResult } = require('express-validator');
+const bcrypt = require('bcryptjs');
+
+
+
+module.exports.registerUser = async (req, res, next) => {
+    const errors = validationResult(req);// Validate the request body
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+    console.log("Registering user with data:", req.body);
+
+    const { fullname, email, password } = req.body;
+   
+const salt = await bcrypt.genSalt(10);
+const hashPassword = await bcrypt.hash(password, salt);
+
+
+
+
+const user = await userService.createUser({
+        firstname: fullname.firstname,
+        lastname: fullname.lastname,
+        email,
+        password: hashPassword
+    });
+
+    const token = user.generateAuthToken(); // Generate JWT token
+
+    res.status(201).json({token, user });
+
+};
+
+
+
+
+
+   
