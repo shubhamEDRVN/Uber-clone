@@ -33,7 +33,27 @@ const user = await userService.createUser({
 
 };
 
+module.exports.loginUser = async (req, res, next) => {
+    const errors = validationResult(req); // Validate the request body
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+    const { email, password } = req.body;
+    
+    const user = await userModel.findOne({email}).select('+password'); // Find user by email and include password field
+    if (!user) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+    }
 
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    const token = user.generateAuthToken(); // Generate JWT token
+
+    res.status(200).json({ token, user });
+}
 
 
 

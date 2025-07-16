@@ -39,9 +39,10 @@ userSchema.methods.generateAuthToken = function() {
   const token = jwt.sign({ _id: this._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
   return token;
 }
-userSchema.comparePassword = async function(candidatePassword) {
+userSchema.methods.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 }
+
 userSchema.static.hashPassword = async function(password) {
   const salt = await bcrypt.genSalt(10);
   return await bcrypt.hash(password, salt);
