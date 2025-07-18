@@ -131,3 +131,95 @@ GET
 - The token will be added to the blacklist collection
 - Blacklisted tokens expire after 24 hours
 - Subsequent requests with the same token will be rejected
+
+---
+
+# Captain API Endpoints
+
+## /captain/register
+
+### Description
+This endpoint registers a new captain (driver) by validating input data, hashing the password, and storing the captain's information including vehicle details in the database.
+
+### HTTP Method
+POST
+
+### URL
+/captain/register
+
+### Request Body
+- **fullname** (object)
+  - **firstname** (string, required, min: 3 characters)
+  - **lastname** (string, required, min: 3 characters)
+- **email** (string, required)
+  - Must be a valid email address
+  - Must be unique
+  - Length: 5-100 characters
+- **password** (string, required)
+  - Minimum 6 characters
+- **vechile** (object)
+  - **color** (string, required)
+  - **plate** (string, required)
+    - Must be unique
+    - Length: 3-15 characters
+  - **capacity** (number, required)
+    - Range: 1-100
+  - **vechileType** (string, required)
+    - Must be one of: ['car', 'bike', 'auto', 'van']
+
+### Success Response
+- **Status Code:** 201 Created
+- **Response Body:**
+  ```json
+  {
+    "token": "JWT_TOKEN",
+    "captain": {
+      "fullname": {
+        "firstname": "John",
+        "lastname": "Doe"
+      },
+      "email": "john@example.com",
+      "vechile": {
+        "color": "black",
+        "plate": "ABC123",
+        "capacity": 4,
+        "vechileType": "car"
+      },
+      "status": "inactive"
+    }
+  }
+  ```
+
+### Error Responses
+- **Status Code:** 400 Bad Request
+  - When validation fails:
+    ```json
+    {
+      "errors": [
+        {
+          "msg": "First name is required",
+          "param": "fullname.firstname",
+          "location": "body"
+        }
+      ]
+    }
+    ```
+  - When email already exists:
+    ```json
+    {
+      "message": "Email already registered"
+    }
+    ```
+  - When vehicle plate already exists:
+    ```json
+    {
+      "message": "Vehicle plate already registered"
+    }
+    ```
+
+### Additional Information
+- Captain status is set to 'inactive' by default
+- Password is hashed before storage
+- Vehicle location (lat/long) can be updated later
+- A JWT token is generated upon successful registration
+- Token expiration is set to 24 hours

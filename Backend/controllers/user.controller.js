@@ -13,6 +13,10 @@ module.exports.registerUser = async (req, res, next) => {
     console.log("Registering user with data:", req.body);
 
     const { fullname, email, password } = req.body;
+    const isUserExists = await userModel.findOne({ email });
+    if (isUserExists) {
+        return res.status(400).json({ message: 'User already exists' });
+    }
    
 const salt = await bcrypt.genSalt(10);
 const hashPassword = await bcrypt.hash(password, salt);
